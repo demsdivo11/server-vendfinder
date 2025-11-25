@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lucky Proxy Vend Finder | Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b1222;
+      --card: rgba(15, 23, 42, 0.9);
+      --accent: #22d3ee;
+      --accent-2: #7c3aed;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --danger: #f43f5e;
+      --border: rgba(255, 255, 255, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at 25% 20%, rgba(124, 58, 237, 0.25), transparent 35%),
+                  radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.2), transparent 32%),
+                  var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header { padding: 32px 24px 8px; text-align: center; }
+    h1 { margin: 0; letter-spacing: 0.5px; font-weight: 700; }
+    .subtitle { color: var(--muted); margin-top: 6px; font-size: 14px; }
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px 64px;
+      display: grid;
+      gap: 18px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: linear-gradient(120deg, rgba(124, 58, 237, 0.18), rgba(34, 211, 238, 0.18));
+      color: var(--text);
+      font-size: 13px;
+      border: 1px solid var(--border);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(12px);
+    }
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+    label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); }
+    input {
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text);
+      transition: border 0.15s ease, transform 0.08s ease;
+    }
+    input:focus {
+      outline: none;
+      border-color: rgba(34, 211, 238, 0.6);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(34, 211, 238, 0.2);
+    }
+    input[type="checkbox"] { width: 18px; height: 18px; }
+    .checkbox-row { flex-direction: row; align-items: center; gap: 8px; }
+    button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+      color: #0b1222;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+      box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);
+    }
+    button:hover { transform: translateY(-1px); filter: brightness(1.02); }
+    button:active { transform: translateY(0); box-shadow: none; }
+    button.danger {
+      background: linear-gradient(135deg, #f43f5e, #e11d48);
+      color: #fff;
+      box-shadow: 0 10px 30px rgba(244, 63, 94, 0.25);
+    }
+    button.ghost {
+      background: transparent;
+      color: var(--accent);
+      box-shadow: none;
+      border: 1px solid var(--border);
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    th { color: var(--muted); font-weight: 600; }
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.12);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .status { min-height: 20px; font-size: 13px; color: var(--muted); }
+    .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+    .toolbar input { max-width: 260px; }
+    .hidden { display: none; }
+    .flex-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .panel-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    #toast-stack {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: grid;
+      gap: 10px;
+      z-index: 999;
+    }
+    .toast {
+      min-width: 240px;
+      max-width: 320px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      color: var(--text);
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.16), rgba(124, 58, 237, 0.16));
+      border: 1px solid var(--border);
+      box-shadow: 0 14px 38px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(8px);
+      animation: fadeIn 0.18s ease;
+    }
+    .toast.success { background: linear-gradient(135deg, rgba(52, 211, 153, 0.2), rgba(34, 211, 238, 0.16)); }
+    .toast.error { background: linear-gradient(135deg, rgba(244, 63, 94, 0.22), rgba(124, 58, 237, 0.14)); }
+    .toast.warn { background: linear-gradient(135deg, rgba(234, 179, 8, 0.25), rgba(124, 58, 237, 0.1)); }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Lucky Proxy Vend Finder | Admin</h1>
+    <p class="subtitle" id="status">Login to manage data</p>
+  </header>
+
+  <main>
+    <div id="auth-wrapper">
+      <section class="card" id="auth-card">
+        <div class="flex-row" style="justify-content: space-between; align-items: flex-start;">
+          <div>
+            <div class="badge">Admin Portal</div>
+            <h2 style="margin:8px 0 4px;">Account Access</h2>
+            <div class="status">Owner account lives on the server. Register to request access; owner must approve.</div>
+          </div>
+        </div>
+        <div id="login-view">
+          <h3 style="margin:14px 0 6px;">Login</h3>
+          <form id="login-form">
+            <label>
+              Username
+              <input name="username" required autocomplete="username">
+            </label>
+            <label>
+              Password
+              <input name="password" type="password" required autocomplete="current-password">
+            </label>
+            <button type="submit">Login</button>
+          </form>
+          <div class="status" id="login-status"></div>
+          <div class="flex-row" style="margin-top:10px;">
+            <span class="status">No account?</span>
+            <button type="button" class="ghost" id="to-register">Create one</button>
+          </div>
+        </div>
+        <div id="register-view" class="hidden">
+          <h3 style="margin:14px 0 6px;">Register (needs approval)</h3>
+          <form id="register-form">
+            <label>
+              Username
+              <input name="username" required autocomplete="username">
+            </label>
+            <label>
+              Password
+              <input name="password" type="password" required autocomplete="new-password">
+            </label>
+            <button type="submit">Submit Registration</button>
+          </form>
+          <div class="status" id="register-status"></div>
+          <div class="flex-row" style="margin-top:10px;">
+            <span class="status">Already have an account?</span>
+            <button type="button" class="ghost" id="to-login">Login here</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div id="dashboard-wrapper" class="hidden">
+      <section class="card" id="apikey-card">
+        <div class="flex-row" style="justify-content: space-between; align-items: center;">
+          <h2 style="margin:0;">Dashboard</h2>
+          <button type="button" id="logout-btn" class="danger">Logout</button>
+        </div>
+        <div class="toolbar" style="margin-top:12px;">
+          <input id="api-key" placeholder="API key" aria-label="API key" readonly>
+          <button id="refresh-key">Load Key</button>
+          <button id="rotate-key" class="danger">Rotate Key (owner)</button>
+          <button id="save-key">Save to Browser</button>
+          <span class="status" id="key-status"></span>
+        </div>
+      </section>
+
+      <section class="card hidden" id="pending-card">
+        <h2 style="margin-top:0;">Pending Registrations (owner)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="pending-table"></tbody>
+        </table>
+      </section>
+
+      <section class="card" id="form-card">
+        <h2 style="margin-top:0;">Add / Update Vend</h2>
+        <form id="vend-form">
+          <label>
+            World Name
+            <input name="worldName" required placeholder="e.g. Gaia">
+          </label>
+          <label>
+            Item Name
+            <input name="itemName" required placeholder="e.g. Lucky Blade">
+          </label>
+          <label>
+            ID
+            <input name="id" required placeholder="Unique ID">
+          </label>
+          <label class="checkbox-row">
+            <input type="checkbox" name="perEach">
+            <span>Per Each?</span>
+          </label>
+          <label>
+            Price
+            <input name="price" type="number" required min="0" step="1" placeholder="125000">
+          </label>
+          <label>
+            Last Update
+            <input name="lastUpdate" type="datetime-local" required>
+          </label>
+          <button type="submit">Save Entry</button>
+        </form>
+      </section>
+
+      <section class="card" id="table-card">
+        <h2 style="margin-top:0;">Live Data</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>World</th>
+              <th>Item</th>
+              <th>ID</th>
+              <th>Per/Each</th>
+              <th>Price</th>
+              <th>Last Update</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="vend-table"></tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+  <div id="toast-stack"></div>
+
+  <script>
+    const tableBody = document.getElementById('vend-table');
+    const form = document.getElementById('vend-form');
+    const status = document.getElementById('status');
+    const loginStatus = document.getElementById('login-status');
+    const registerStatus = document.getElementById('register-status');
+    const keyStatus = document.getElementById('key-status');
+    const apiKeyInput = document.getElementById('api-key');
+    const pendingTable = document.getElementById('pending-table');
+
+    const apikeyCard = document.getElementById('apikey-card');
+    const pendingCard = document.getElementById('pending-card');
+    const formCard = document.getElementById('form-card');
+    const tableCard = document.getElementById('table-card');
+    const rotateKeyBtn = document.getElementById('rotate-key');
+    const authWrapper = document.getElementById('auth-wrapper');
+    const dashboardWrapper = document.getElementById('dashboard-wrapper');
+    const loginView = document.getElementById('login-view');
+    const registerView = document.getElementById('register-view');
+    const toRegister = document.getElementById('to-register');
+    const toLogin = document.getElementById('to-login');
+    const toastStack = document.getElementById('toast-stack');
+
+    let currentUser = null;
+    let apiKeyValue = localStorage.getItem('vendApiKey') || '';
+
+    const setStatus = (msg) => { status.textContent = msg; };
+    const show = (el, shouldShow) => { el.classList.toggle('hidden', !shouldShow); };
+    const authHeaders = { 'Content-Type': 'application/json' };
+    const showToast = (message, variant = 'info') => {
+      const el = document.createElement('div');
+      el.className = `toast ${variant}`;
+      el.textContent = message;
+      toastStack.appendChild(el);
+      setTimeout(() => el.remove(), 3200);
+    };
+    const showAuthView = (view) => {
+      show(loginView, view === 'login');
+      show(registerView, view === 'register');
+    };
+
+    const updateUI = () => {
+      const loggedIn = Boolean(currentUser);
+      show(authWrapper, !loggedIn);
+      show(dashboardWrapper, loggedIn);
+      show(apikeyCard, loggedIn);
+      show(formCard, loggedIn);
+      show(tableCard, loggedIn);
+      show(pendingCard, loggedIn && currentUser?.role === 'owner');
+      rotateKeyBtn.disabled = !loggedIn || currentUser?.role !== 'owner';
+      if (!loggedIn) {
+        setStatus('Login to manage data');
+        tableBody.innerHTML = '';
+        showAuthView('login');
+      } else {
+        setStatus(`Logged in as ${currentUser.username} (${currentUser.role})`);
+      }
+      apiKeyInput.value = apiKeyValue || '';
+    };
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      loginStatus.textContent = '';
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: authHeaders,
+          credentials: 'include',
+          body: JSON.stringify({
+            username: formData.get('username'),
+            password: formData.get('password'),
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Login failed');
+        currentUser = data;
+        await loadApiKey();
+        await fetchVends();
+        await loadPending();
+        loginStatus.textContent = 'Logged in';
+        showAuthView('login');
+        showToast('Login success, welcome back!', 'success');
+      } catch (err) {
+        const msg = err.message.includes('Route not found')
+          ? 'Backend not running latest code. Restart server and try again.'
+          : err.message;
+        loginStatus.textContent = msg;
+        showToast(msg, 'error');
+      } finally {
+        updateUI();
+      }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+      currentUser = null;
+      tableBody.innerHTML = '';
+      updateUI();
+      showAuthView('login');
+      showToast('Logged out', 'info');
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      registerStatus.textContent = '';
+      try {
+        const res = await fetch('/auth/register', {
+          method: 'POST',
+          headers: authHeaders,
+          body: JSON.stringify({
+            username: formData.get('username'),
+            password: formData.get('password'),
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Register failed');
+        registerStatus.textContent = data.message || 'Registration submitted';
+        e.target.reset();
+        showAuthView('login');
+        showToast(data.message || 'Registration submitted; wait for approval', 'success');
+      } catch (err) {
+        registerStatus.textContent = err.message;
+        showToast(err.message, 'error');
+      }
+    });
+
+    toRegister.addEventListener('click', () => showAuthView('register'));
+    toLogin.addEventListener('click', () => showAuthView('login'));
+
+    document.getElementById('refresh-key').addEventListener('click', async () => {
+      await loadApiKey();
+    });
+
+    document.getElementById('save-key').addEventListener('click', () => {
+      if (!apiKeyValue) return (keyStatus.textContent = 'No key loaded');
+      localStorage.setItem('vendApiKey', apiKeyValue);
+      keyStatus.textContent = 'Saved locally (used by public page)';
+      showToast('API key saved to browser', 'success');
+    });
+
+    document.getElementById('rotate-key').addEventListener('click', async () => {
+      try {
+        const res = await fetch('/owner/api-key/rotate', { method: 'POST', credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Rotate failed');
+        apiKeyValue = data.apiKey;
+        apiKeyInput.value = apiKeyValue;
+        localStorage.setItem('vendApiKey', apiKeyValue);
+        keyStatus.textContent = 'Rotated and saved';
+        showToast('API key rotated', 'success');
+      } catch (err) {
+        keyStatus.textContent = err.message;
+        showToast(err.message, 'error');
+      }
+    });
+
+    const loadApiKey = async () => {
+      try {
+        const res = await fetch('/owner/api-key', { credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Unable to load key');
+        apiKeyValue = data.apiKey;
+        apiKeyInput.value = apiKeyValue;
+        localStorage.setItem('vendApiKey', apiKeyValue);
+        keyStatus.textContent = 'Key loaded';
+        showToast('API key loaded', 'success');
+      } catch (err) {
+        keyStatus.textContent = err.message;
+        showToast(err.message, 'error');
+      }
+    };
+
+    const fetchVends = async () => {
+      if (!apiKeyValue) return;
+      try {
+        const res = await fetch('/api/vends', { headers: { 'x-api-key': apiKeyValue } });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load data');
+        renderTable(data);
+        setStatus(`Loaded ${data.length} entries`);
+      } catch (err) {
+        setStatus(err.message);
+        tableBody.innerHTML = '';
+        showToast(err.message, 'error');
+      }
+    };
+
+    const renderTable = (rows) => {
+      if (!rows.length) {
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:18px;">No data yet</td></tr>';
+        return;
+      }
+      tableBody.innerHTML = rows.map((row) => `
+        <tr>
+          <td>${row.worldName}</td>
+          <td>${row.itemName}</td>
+          <td><span class="pill">${row.id}</span></td>
+          <td>${row.perEach ? 'Yes' : 'No'}</td>
+          <td>${Number(row.price) || 0}</td>
+          <td>${new Date(row.lastUpdate).toLocaleString()}</td>
+          <td><button class="danger" data-id="${row.id}">Remove</button></td>
+        </tr>
+      `).join('');
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const payload = {
+        worldName: formData.get('worldName'),
+        itemName: formData.get('itemName'),
+        id: formData.get('id'),
+        perEach: formData.get('perEach') === 'on',
+        price: Number(formData.get('price')),
+        lastUpdate: formData.get('lastUpdate'),
+      };
+      try {
+        const method = await entryExists(payload.id) ? 'PUT' : 'POST';
+        const res = await fetch(`/api/vends${method === 'PUT' ? `/${payload.id}` : ''}`, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKeyValue,
+          },
+          body: JSON.stringify(payload),
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Request failed');
+        setStatus(`${method === 'PUT' ? 'Updated' : 'Added'} ${result.itemName}`);
+        form.reset();
+        fetchVends();
+        showToast(`${method === 'PUT' ? 'Updated' : 'Added'} ${result.itemName}`, 'success');
+      } catch (err) {
+        setStatus(err.message);
+        showToast(err.message, 'error');
+      }
+    });
+
+    tableBody.addEventListener('click', async (e) => {
+      if (e.target.matches('button[data-id]')) {
+        const id = e.target.getAttribute('data-id');
+        try {
+          const res = await fetch(`/api/vends/${id}`, {
+            method: 'DELETE',
+            headers: { 'x-api-key': apiKeyValue },
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Delete failed');
+          setStatus(`Removed ${result.itemName}`);
+          fetchVends();
+          showToast(`Removed ${result.itemName}`, 'success');
+        } catch (err) {
+          setStatus(err.message);
+          showToast(err.message, 'error');
+        }
+      }
+    });
+
+    const entryExists = async (id) => {
+      if (!apiKeyValue) return false;
+      const res = await fetch('/api/vends', { headers: { 'x-api-key': apiKeyValue } });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to check entry');
+      return data.some((row) => row.id === id);
+    };
+
+    const loadPending = async () => {
+      if (!currentUser || currentUser.role !== 'owner') {
+        pendingTable.innerHTML = '';
+        return;
+      }
+      try {
+        const res = await fetch('/owner/pending', { credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load pending');
+        if (!data.length) {
+          pendingTable.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--muted);padding:18px;">No pending requests</td></tr>';
+          return;
+        }
+        pendingTable.innerHTML = data.map((p) => `
+          <tr>
+            <td>${p.username}</td>
+            <td><button class="danger" data-approve="${p.username}">Approve</button></td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        pendingTable.innerHTML = `<tr><td colspan="2" style="color:var(--danger);padding:12px;">${err.message}</td></tr>`;
+      }
+    };
+
+    pendingTable.addEventListener('click', async (e) => {
+      if (e.target.matches('button[data-approve]')) {
+        const username = e.target.getAttribute('data-approve');
+        try {
+          const res = await fetch(`/owner/pending/${username}/approve`, {
+            method: 'POST',
+            credentials: 'include',
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Approve failed');
+          setStatus(`Approved ${data.username}`);
+          await loadPending();
+          showToast(`Approved ${data.username}`, 'success');
+        } catch (err) {
+          setStatus(err.message);
+          showToast(err.message, 'error');
+        }
+      }
+    });
+
+    const checkSession = async () => {
+      try {
+        const res = await fetch('/auth/me', { credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) throw new Error('no session');
+        currentUser = data;
+        await loadApiKey();
+        await fetchVends();
+        await loadPending();
+      } catch {
+        currentUser = null;
+      } finally {
+        updateUI();
+      }
+    };
+
+    checkSession();
+  </script>
+</body>
+</html>

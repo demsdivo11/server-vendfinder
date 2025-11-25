@@ -1,0 +1,17 @@
+{
+  "name": "server-vendfind",
+  "version": "1.0.0",
+  "description": "Lucky Proxy Vend Finder - simple Express CRUD API with minimal UI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

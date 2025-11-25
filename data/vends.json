@@ -1,0 +1,18 @@
+[
+  {
+    "worldName": "START",
+    "itemName": "Golden Heart Cor",
+    "id": "1337",
+    "perEach": true,
+    "price": 125555,
+    "lastUpdate": "2025-11-25T21:12"
+  },
+  {
+    "worldName": "GIGACHAD",
+    "itemName": "Blue Gem Lock",
+    "id": "7188",
+    "perEach": true,
+    "price": 10000,
+    "lastUpdate": "2025-11-25T21:25"
+  }
+]

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lucky Proxy Vend Finder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --accent: #22d3ee;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --danger: #f43f5e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at 20% 20%, #1f2937 0, #0f172a 35%, #0b1023 75%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      padding: 32px 24px 16px;
+      text-align: center;
+    }
+    h1 { margin: 0; letter-spacing: 0.5px; }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 64px;
+      display: grid;
+      gap: 24px;
+      grid-template-columns: 1fr;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .toolbar input {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: #0b1222;
+      color: var(--text);
+      min-width: 240px;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 14px;
+    }
+    th { color: var(--muted); font-weight: 600; }
+    .pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.1);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .status {
+      min-height: 20px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    @media (max-width: 720px) {
+      table { font-size: 13px; }
+      th, td { padding: 10px 6px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Lucky Proxy Vend Finder</h1>
+    <p class="status" id="status">View only. Manage entries via /admin</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2 style="margin-top:0;">Live Data</h2>
+      <div class="toolbar">
+        <input id="search" placeholder="Search world, item, or ID..." aria-label="Search">
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>World</th>
+            <th>Item</th>
+            <th>ID</th>
+            <th>Per/Each</th>
+            <th>Price</th>
+            <th>Last Update</th>
+          </tr>
+        </thead>
+        <tbody id="vend-table"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const tableBody = document.getElementById('vend-table');
+    const status = document.getElementById('status');
+    const searchInput = document.getElementById('search');
+    let cache = [];
+
+    const setStatus = (msg) => { status.textContent = msg; };
+
+    const fetchVends = async () => {
+      const API_KEY = localStorage.getItem('vendApiKey');
+      if (!API_KEY) {
+        setStatus('Set API key via /admin then reload');
+        return;
+      }
+      setStatus('Loading data...');
+      try {
+        const res = await fetch('/api/vends', { headers: { 'x-api-key': API_KEY } });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load data');
+        cache = Array.isArray(data) ? data : [];
+        renderTable(cache);
+        setStatus(`Loaded ${data.length} entries`);
+      } catch (err) {
+        setStatus(err.message + ' — check API key via /admin');
+        tableBody.innerHTML = '';
+      }
+    };
+
+    const filterRows = () => {
+      const term = searchInput.value.trim().toLowerCase();
+      if (!term) return cache;
+      return cache.filter((row) => {
+        const haystack = `${row.worldName} ${row.itemName} ${row.id}`.toLowerCase();
+        return haystack.includes(term);
+      });
+    };
+
+    const renderTable = (rows) => {
+      if (!rows.length) {
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:18px;">No data yet</td></tr>';
+        return;
+      }
+      tableBody.innerHTML = rows.map((row) => `
+        <tr>
+          <td>${row.worldName}</td>
+          <td>${row.itemName}</td>
+          <td><span class="pill">${row.id}</span></td>
+          <td>${row.perEach ? 'Yes' : 'No'}</td>
+          <td>${Number(row.price) || 0}</td>
+          <td>${new Date(row.lastUpdate).toLocaleString()}</td>
+        </tr>
+      `).join('');
+    };
+
+    searchInput.addEventListener('input', () => renderTable(filterRows()));
+    fetchVends();
+  </script>
+</body>
+</html>
