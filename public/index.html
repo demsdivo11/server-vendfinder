@@ -107,6 +107,8 @@
             <th>Per/Each</th>
             <th>Price</th>
             <th>Last Update</th>
+            <th>X</th>
+            <th>Y</th>
           </tr>
         </thead>
         <tbody id="vend-table"></tbody>
@@ -153,7 +155,7 @@
 
     const renderTable = (rows) => {
       if (!rows.length) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:18px;">No data yet</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:18px;">No data yet</td></tr>';
         return;
       }
       tableBody.innerHTML = rows.map((row) => `
@@ -164,6 +166,8 @@
           <td>${row.perEach ? 'Yes' : 'No'}</td>
           <td>${Number(row.price) || 0}</td>
           <td>${new Date(row.lastUpdate).toLocaleString()}</td>
+          <td>${row.x != null ? row.x : '-'}</td>
+          <td>${row.y != null ? row.y : '-'}</td>
         </tr>
       `).join('');
     };

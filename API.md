@@ -78,12 +78,14 @@ Field requirements:
 - `perEach` (boolean)
 - `price` (integer, non-negative)
 - `lastUpdate` (ISO datetime string)
+ - `x` (optional, number) — X coordinate for the vend position (stored as number or `null`)
+ - `y` (optional, number) — Y coordinate for the vend position (stored as number or `null`)
 
 ### GET /api/vends
 List all entries.
 Response: `200 OK`
 ```json
-[ { "worldName": "Gaia", "itemName": "Lucky Blade", "id": "LB-1001", "perEach": true, "price": 125000, "lastUpdate": "2024-04-01T10:00:00Z" } ]
+[ { "worldName": "Gaia", "itemName": "Lucky Blade", "id": "LB-1001", "perEach": true, "price": 125000, "lastUpdate": "2024-04-01T10:00:00Z", "x": 100, "y": 200 } ]
 ```
 
 ### POST /api/vends
@@ -96,7 +98,9 @@ Request body example:
   "id": "LB-1001",
   "perEach": true,
   "price": 125000,
-  "lastUpdate": "2024-04-01T10:00:00Z"
+  "lastUpdate": "2024-04-01T10:00:00Z",
+  "x": 100,
+  "y": 200
 }
 ```
 Responses:
@@ -110,6 +114,10 @@ Responses:
 - `200 OK` with updated entry.
 - `400 Bad Request` for invalid fields.
 - `404 Not Found` if id missing.
+
+Notes:
+- `x` and `y` are optional. If present they must be numeric; empty or missing values are stored as `null`.
+- The public listing (`/`) reads the API key from `localStorage.vendApiKey`. Use the admin page `/admin` and click **Save to Browser** to store the key in your browser for the public page to load data.
 
 ### DELETE /api/vends/:id
 Delete by id.

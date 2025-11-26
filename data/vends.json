@@ -1,11 +1,13 @@
 [
   {
-    "worldName": "START",
-    "itemName": "Golden Heart Cor",
+    "worldName": "BUYGAUT",
+    "itemName": "GAIA INTERACK",
     "id": "1337",
     "perEach": true,
-    "price": 125555,
-    "lastUpdate": "2025-11-25T21:12"
+    "price": 143,
+    "lastUpdate": "2025-11-26T20:16",
+    "x": 5,
+    "y": 2
   },
   {
     "worldName": "GIGACHAD",
@@ -14,5 +16,13 @@
     "perEach": true,
     "price": 10000,
     "lastUpdate": "2025-11-25T21:25"
+  },
+  {
+    "worldName": "BUYGAUT",
+    "itemName": "GAIA INTERACK",
+    "id": "1282",
+    "perEach": true,
+    "price": 12500,
+    "lastUpdate": "2025-11-26T20:11"
   }
 ]

@@ -174,9 +174,18 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+const parseCoord = (v) => {
+  if (v === null || v === undefined || v === '') return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+};
+
 const isValidVend = (body) => {
   const required = ['worldName', 'itemName', 'id', 'perEach', 'price', 'lastUpdate'];
-  return required.every((key) => key in body);
+  if (!required.every((key) => key in body)) return false;
+  if ('x' in body && body.x !== null && body.x !== '' && !Number.isFinite(Number(body.x))) return false;
+  if ('y' in body && body.y !== null && body.y !== '' && !Number.isFinite(Number(body.y))) return false;
+  return true;
 };
 
 app.post('/auth/login', async (req, res) => {
@@ -263,6 +272,8 @@ app.post('/api/vends', async (req, res) => {
     perEach: Boolean(data.perEach),
     price,
     lastUpdate: data.lastUpdate,
+    x: parseCoord(data.x),
+    y: parseCoord(data.y),
   };
 
   vends.push(newEntry);
@@ -291,6 +302,8 @@ app.put('/api/vends/:id', async (req, res) => {
     perEach: Boolean(data.perEach),
     price,
     lastUpdate: data.lastUpdate,
+    x: parseCoord(data.x),
+    y: parseCoord(data.y),
   };
   await saveVends();
   res.json(vends[index]);
@@ -315,7 +328,9 @@ app.use((req, res) => {
   try {
     await ensureFiles();
     await Promise.all([loadVends(), loadAuth()]);
-    app.listen(PORT, () => {
+    // Bind to localhost by default for local testing. To expose on all interfaces,
+    // set the PORT env var and/or change the host to '0.0.0.0'.
+    app.listen(PORT, '127.0.0.1', () => {
       console.log(`Lucky Proxy Vend Finder running at http://localhost:${PORT}`);
     });
   } catch (err) {
